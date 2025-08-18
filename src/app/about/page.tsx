@@ -12,7 +12,7 @@ export default function Home() {
 
       {/* Page content */}
       <div className="flex-grow  p-6">
-        This is the home page of the clipkart.
+        It is the about page of clipkart.
       </div>
 
       <Footer />
