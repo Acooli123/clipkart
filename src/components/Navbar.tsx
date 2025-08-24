@@ -1,13 +1,22 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import React from "react";
+import { useCart } from "@/components/CartContext";
+
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
+  const { 
+    cartCount,
+    cartItems,
+    increaseQuantity,
+    decreaseQuantity,
+    clearCart 
+  } = useCart();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [cartOpen, setCartOpen] = React.useState(false);
 
   return (
-    <nav className=" p-4 shadow-xl bg-white flex flex-col  ">
+    <nav className="p-4 shadow-xl bg-white flex flex-col">
       <div className="flex items-center justify-between">
         {/* Left - App Name */}
         <div className="font-bold text-xl">Clipkart</div>
@@ -35,34 +44,94 @@ export default function Navbar() {
           <Link href="/contact">Contact</Link>
         </div>
 
-        {/* Right - Cart Icon (Responsive) */}
+        {/* Right - Cart Icon */}
         <div className="relative flex items-center">
           <button
             onClick={() => setCartOpen(!cartOpen)}
-            className="flex items-center justify-center"
+            className="flex items-center justify-center relative"
           >
             <img
-              src="cart.jpg"
+              src="/cart.jpg"
               alt="cart"
               className="w-7 h-7 object-contain"
             />
+
+            {/* 🔴 Badge for total items */}
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {cartCount}
+              </span>
+            )}
           </button>
 
-          {/* Dropdown Cart (mobile + desktop) */}
+          {/* Dropdown Cart */}
           {cartOpen && (
-            <div className="absolute right-0 top-10 w-56 bg-white shadow-lg rounded-xl p-4 z-50">
+            <div className="absolute right-0 top-10 w-72 bg-white shadow-lg rounded-xl p-4 z-50">
               <h3 className="font-semibold text-gray-800">Your Cart</h3>
-              <ul className="mt-2 space-y-2 text-sm text-gray-600">
-                <li>🛒 Item 1</li>
-                <li>🛒 Item 2</li>
-                <li>🛒 Item 3</li>
+
+              <ul className="mt-2 space-y-3 text-sm text-gray-600">
+                {Object.keys(cartItems).length === 0 && (
+                  <li className="text-gray-500 text-center">Cart is empty</li>
+                )}
+
+                {Object.entries(cartItems).map(([itemCode, item]) => (
+                  <li
+                    key={itemCode}
+                    className="flex justify-between items-center border-b pb-2"
+                  >
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-xs text-gray-500">
+                        ₹{item.price} × {item.quantity}
+                      </p>
+                    </div>
+
+                    {/* Quantity Buttons */}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => decreaseQuantity(itemCode)}
+                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      >
+                        -
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button
+                        onClick={() => increaseQuantity(itemCode)}
+                        className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </li>
+                ))}
               </ul>
-              <Link
-                href="/cart"
-                className="block mt-3 text-center bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition"
-              >
-                View Cart
-              </Link>
+
+              {Object.keys(cartItems).length > 0 && (
+                <>
+                  <div className="mt-3 text-right font-semibold">
+                    Subtotal: ₹
+                    {Object.entries(cartItems).reduce(
+                      (sum, [_, item]) => sum + item.price * item.quantity,
+                      0
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 mt-4 justify-center">
+                    <Link
+                      href="/cart"
+                      className="flex-1 text-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+                    >
+                      View Cart
+                    </Link>
+                    <button
+                      onClick={clearCart}
+                      className="flex-1 text-center bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition"
+                    >
+                      Clear Cart
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

@@ -1,0 +1,38 @@
+@media print {
+  /* Hide unnecessary elements when printing */
+  nav, footer, .print-hide {
+    display: none !important;
+  }
+
+  /* Reset background colors and shadows for printing */
+  body {
+    background: white !important;
+  }
+
+  /* Ensure proper page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Ensure dark text for better printing */
+  * {
+    color: black !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure tables print properly */
+  table {
+    page-break-inside: avoid;
+  }
+
+  /* Format links for printing */
+  a {
+    text-decoration: none !important;
+  }
+
+  /* Ensure proper margins */
+  @page {
+    margin: 2cm;
+  }
+}

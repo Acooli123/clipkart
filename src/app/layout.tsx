@@ -1,5 +1,9 @@
 import "./globals.css";
 
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { CartProvider } from "@/components/CartContext";
+
 export default function RootLayout({
   children,
 }: {
@@ -8,12 +12,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">
-        {/* Global Navbar can go here if you want it on all pages */}
+        <CartProvider>
+          {/* Sticky Navbar */}
+          <div className="sticky top-0 z-50 w-full bg-white shadow-md">
+            <Navbar />
+          </div>
 
-        {/* Page-specific content */}
-        {children}
+          {/* Page-specific content */}
+          <main className="flex-1">{children}</main>
 
-        {/* Global Footer can go here if you want it on all pages */}
+          {/* Footer */}
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
