@@ -1,10 +1,13 @@
 "use client";
 import Link from "next/link";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/components/CartContext";
+import { useUser } from "@/context/UserContext";
 
 
 export default function Navbar() {
+  const router = useRouter();
   const { 
     cartCount,
     cartItems,
@@ -12,6 +15,7 @@ export default function Navbar() {
     decreaseQuantity,
     clearCart 
   } = useCart();
+  const { user, isAuthenticated, logout } = useUser();
   const [isOpen, setIsOpen] = React.useState(false);
   const [cartOpen, setCartOpen] = React.useState(false);
 
@@ -39,16 +43,41 @@ export default function Navbar() {
           <Link href="/mugs">Mugs</Link>
           <Link href="/product">Product</Link>
           <Link href="/order">Order</Link>
-          <Link href="/checkout">Checkout</Link>
-          <Link href="/login">Login</Link>
+          
           <Link href="/contact">Contact</Link>
         </div>
 
-        {/* Right - Cart Icon */}
-        <div className="relative flex items-center">
+        {/* Right - Login and Cart Icons */}
+        <div className="relative flex items-center gap-4">
+          {/* Login/Logout Button */}
+          {isAuthenticated ? (
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 hover:text-indigo-600 transition-colors"
+            >
+              <img
+                src="/login.jpg"
+                alt="logout"
+                className="w-7 h-7 object-contain"
+              />
+              <span className="text-sm">Logout</span>
+            </button>
+          ) : (
+            <Link href="/login" className="flex items-center gap-2 hover:text-indigo-600 transition-colors">
+              <img
+                src="/login.jpg"
+                alt="login"
+                className="w-7 h-7 object-contain"
+              />
+              <span className="text-sm">Login</span>
+            </Link>
+          )}
+
+          {/* Cart Button */}
           <button
-            onClick={() => setCartOpen(!cartOpen)}
-            className="flex items-center justify-center relative"
+            onClick={() => isAuthenticated ? setCartOpen(!cartOpen) : router.push('/login')}
+            className={`flex items-center justify-center relative ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={!isAuthenticated ? 'Please login to use cart' : 'View cart'}
           >
             <img
               src="/cart.jpg"
@@ -148,8 +177,6 @@ export default function Navbar() {
           <Link href="/mugs">Mugs</Link>
           <Link href="/product">Product</Link>
           <Link href="/order">Order</Link>
-          <Link href="/checkout">Checkout</Link>
-          <Link href="/login">Login</Link>
           <Link href="/contact">Contact</Link>
         </div>
       )}
