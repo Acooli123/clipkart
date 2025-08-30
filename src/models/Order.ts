@@ -14,4 +14,5 @@ const orderSchema = new Schema({
   status: { type: String, required: true, default: 'Pending' },
 }, { timestamps: true });
 
+mongoose.models = {};
 export default mongoose.model("Order", orderSchema);

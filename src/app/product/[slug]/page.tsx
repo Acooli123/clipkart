@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Product from "@/models/Product";
+import connectDb from "@/lib/dbConnect";
 import { useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
 
@@ -16,28 +18,36 @@ export default function Page({ params }: { params: { slug: string } }) {
   // State to track if an item has been added to the cart
   const [itemAdded, setItemAdded] = useState(false);
 
-  useEffect(() => {
-    const checkServiceability = async () => {
-      if (pincode.length === 6) {
-        // only check if pincode is 6 digits
-        let pins = await fetch("http://localhost:3000/api/pincode");
-        let pinJson = await pins.json();
+  const checkServiceability = async () => {
+  const pins = await fetch("/api/pincode");
+  const pinJson = await pins.json();
 
-        if (pinJson.includes(parseInt(pincode))) {
-          setService("Yes");
-        } else {
-          setService("No");
-        }
-      } else {
-        setService(""); // reset if pincode not valid
-      }
-    };
-    checkServiceability();
-  }, [pincode]); // runs every time pincode changes
+  console.log("📦 API Response:", pinJson, "Entered Pincode:", pincode);
+
+  // If API returns strings (["123456", "654321"])
+  if (pinJson.pincodes?.includes(pincode)) {
+    setService("Yes");
+  }
+  // If API returns numbers ([123456, 654321])
+  else if (pinJson.pincodes?.includes(parseInt(pincode))) {
+    setService("Yes");
+  } 
+  else {
+    setService("No");
+  }
+};
+
+
+  useEffect(() => {
+    if (pincode) {
+      checkServiceability();
+    }
+  }, [pincode]);
 
   const onChangePincode = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPincode(e.target.value);
   };
+
 
   // New function to handle adding to cart and updating state
   const handleAddToCart = () => {
@@ -176,7 +186,7 @@ export default function Page({ params }: { params: { slug: string } }) {
                 />
 
                 <button
-                  // onClick={checkServiceability}
+                  onClick={checkServiceability}
                   className="mt-2 justify-center items-center text-white bg-yellow-600 border-0 py-1 px-6 focus:outline-currentColor hover:bg-orange-400 rounded-lg"
                 >
                   check
@@ -196,7 +206,26 @@ export default function Page({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </section>
-      <Footer />
+      {/* <Footer /> */}
     </div>
   );
 }
+
+// export async function getServerSideProps(context) {
+//   if(!mongoose.connections[0].readyState){
+//     await mongoose.connect(process.env.MONGO_URI)
+//   }
+//   let product = await Product.findOne({slug: context.params.slug});
+//   let varients = await Product.find({title: product.title, category: product.category});
+//   let sizeColorSlug = {};
+//   for(let item of varients){
+//     if(Object.keys(sizeColorSlug).includes(item.size)){
+//       sizeColorSlug[item.size][item.color] = item.slug
+//     }else{
+//       sizeColorSlug[item.size] = {}
+//       sizeColorSlug[item.size][item.color] = item.slug
+//     }
+//   }
+//   return { props: { product: JSON.parse(JSON.stringify(product)) } };
+
+// }
