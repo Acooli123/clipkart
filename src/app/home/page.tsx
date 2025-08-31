@@ -1,5 +1,7 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
+import { useUser } from "@/context/UserContext";
+import AuthDebugger from "@/components/AuthDebugger";
 
 export default function page() {
   return (
@@ -7,7 +9,20 @@ export default function page() {
       {/* Navbar */}
       <Navbar />
       
+      {/* Debug Component */}
+      <AuthDebugger />
+      
       <main className="flex-grow p-4 container mx-auto">
+        {/* Welcome Message */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            Welcome to Clipkart! 🛍️
+          </h1>
+          <p className="text-xl text-gray-600">
+            Your one-stop destination for all your shopping needs
+          </p>
+        </div>
+
         {/* Responsive Image */}
         <div className="mt-6 flex justify-center">
           <img
@@ -21,7 +36,7 @@ export default function page() {
           <div className="container px-5 py-24 mx-auto">
             <div className="flex flex-wrap w-full mb-20 flex-col items-center text-center">
               <h1 className="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
-                Complete Your This Puja Shopping with Clipkart.
+                Complete Your Shopping with Clipkart
               </h1>
               <p className="lg:w-1/2 w-full leading-relaxed text-gray-500">
                 Clipkart is a modern e-commerce platform that offers a wide
@@ -48,11 +63,10 @@ export default function page() {
                     </svg>
                   </div>
                   <h2 className="text-lg text-gray-900 font-medium title-font mb-2">
-                    Shooting Stars
+                    Quality Products
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Fingerstache flexitarian street art 8-bit waist co, subway
-                    tile poke farm.
+                    We offer only the highest quality products from trusted brands.
                   </p>
                 </div>
               </div>
@@ -75,11 +89,10 @@ export default function page() {
                     </svg>
                   </div>
                   <h2 className="text-lg text-gray-900 font-medium title-font mb-2">
-                    The Catalyzer
+                    Fast Delivery
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Fingerstache flexitarian street art 8-bit waist co, subway
-                    tile poke farm.
+                    Get your orders delivered quickly and safely to your doorstep.
                   </p>
                 </div>
               </div>
@@ -89,9 +102,9 @@ export default function page() {
                     <svg
                       fill="none"
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       className="w-6 h-6"
                       viewBox="0 0 24 24"
                     >
@@ -100,11 +113,10 @@ export default function page() {
                     </svg>
                   </div>
                   <h2 className="text-lg text-gray-900 font-medium title-font mb-2">
-                    Neptune
+                    24/7 Support
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Fingerstache flexitarian street art 8-bit waist co, subway
-                    tile poke farm.
+                    Our customer support team is always ready to help you.
                   </p>
                 </div>
               </div>
@@ -114,9 +126,9 @@ export default function page() {
                     <svg
                       fill="none"
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       className="w-6 h-6"
                       viewBox="0 0 24 24"
                     >
@@ -124,11 +136,10 @@ export default function page() {
                     </svg>
                   </div>
                   <h2 className="text-lg text-gray-900 font-medium title-font mb-2">
-                    Melanchole
+                    Secure Shopping
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Fingerstache flexitarian street art 8-bit waist co, subway
-                    tile poke farm.
+                    Shop with confidence with our secure payment system.
                   </p>
                 </div>
               </div>
@@ -138,9 +149,9 @@ export default function page() {
                     <svg
                       fill="none"
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       className="w-6 h-6"
                       viewBox="0 0 24 24"
                     >
@@ -148,11 +159,10 @@ export default function page() {
                     </svg>
                   </div>
                   <h2 className="text-lg text-gray-900 font-medium title-font mb-2">
-                    Bunker
+                    Best Prices
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Fingerstache flexitarian street art 8-bit waist co, subway
-                    tile poke farm.
+                    Get the best prices and exclusive deals on all products.
                   </p>
                 </div>
               </div>
@@ -162,9 +172,9 @@ export default function page() {
                     <svg
                       fill="none"
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       className="w-6 h-6"
                       viewBox="0 0 24 24"
                     >
@@ -172,18 +182,23 @@ export default function page() {
                     </svg>
                   </div>
                   <h2 className="text-lg text-gray-900 font-medium title-font mb-2">
-                    Ramona Falls
+                    Easy Returns
                   </h2>
                   <p className="leading-relaxed text-base">
-                    Fingerstache flexitarian street art 8-bit waist co, subway
-                    tile poke farm.
+                    Hassle-free returns and exchanges for your convenience.
                   </p>
                 </div>
               </div>
             </div>
-            <button className="flex mx-auto mt-16 text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg">
-              Button
-            </button>
+            
+            <div className="text-center mt-16">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                Ready to Start Shopping?
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Explore our wide range of products and find what you need!
+              </p>
+            </div>
           </div>
         </section>
       </main>

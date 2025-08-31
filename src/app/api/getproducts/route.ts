@@ -1,45 +1,29 @@
 import connectDb from "@/lib/dbConnect";
 import Product from "@/models/Product";
 
-// GET method for fetching only t-shirts
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await connectDb();
-
-    // ✅ Fetch only products with category "tshirt"
-    const products = await Product.find({ category: "t-shirts" });
-    let tshirts: Record<string, any> = {};
-
-    for (let item of products) {
-      if (tshirts[item.title]) {
-        // If same title exists, push new color/size
-        if (item.availableQty > 0) {
-          if (!tshirts[item.title].color.includes(item.color)) {
-            tshirts[item.title].color.push(item.color);
-          }
-          if (!tshirts[item.title].size.includes(item.size)) {
-            tshirts[item.title].size.push(item.size);
-          }
-        }
-      } else {
-        // First time adding this product title
-        tshirts[item.title] = JSON.parse(JSON.stringify(item));
-        if (item.availableQty > 0) {
-          tshirts[item.title].color = [item.color];
-          tshirts[item.title].size = [item.size];
-        } else {
-          tshirts[item.title].color = [];
-          tshirts[item.title].size = [];
-        }
-      }
+    
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    
+    console.log("🔍 Fetching products for category:", category);
+    
+    let query = {};
+    if (category) {
+      query = { category: category };
     }
-
-    // ✅ Return only t-shirts
-    return Response.json(tshirts);
+    
+    const products = await Product.find(query);
+    console.log(`✅ Found ${products.length} products for category: ${category}`);
+    
+    return Response.json(products);
+    
   } catch (error) {
-    console.error("❌ Error fetching t-shirts:", error);
+    console.error("❌ Error fetching products:", error);
     return Response.json(
-      { error: "Failed to fetch t-shirts" },
+      { error: "Failed to fetch products" },
       { status: 500 }
     );
   }

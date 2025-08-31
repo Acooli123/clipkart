@@ -1,23 +1,53 @@
+"use client";
 import Link from "next/link";
 import Footer from "@/components/Footer";
-import Product from "@/models/Product";
-import connectDb from "@/lib/dbConnect";
 import Navbar from "@/components/Navbar";
+import { useState, useEffect } from "react";
 
 type ProductType = {
   _id: string;
   title: string;
   category: string;
   price: number;
-  size: string[];
+  size: string;
   image: string;
   slug: string;
 };
 
-export default async function Page() {
-  await connectDb();
+export default function Page() {
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = await Product.find({ category: "t-shirts" }).lean();
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/getproducts?category=t-shirts');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error('Failed to fetch products');
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen w-full">
+        <Navbar />
+        <div className="flex items-center justify-center flex-1">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col -mt-5 min-h-screen w-full">
@@ -55,31 +85,9 @@ export default async function Page() {
                       {product.title}
                     </h2>
                     <div className="mt-1">
-                      {product.size.includes("S") && (
-                        <span className="border border-gray-300 px-1 mx-1">
-                          S
-                        </span>
-                      )}
-                      {product.size.includes("M") && (
-                        <span className="border border-gray-300 px-1 mx-1">
-                          M
-                        </span>
-                      )}
-                      {product.size.includes("L") && (
-                        <span className="border border-gray-300 px-1 mx-1">
-                          L
-                        </span>
-                      )}
-                      {product.size.includes("XL") && (
-                        <span className="border border-gray-300 px-1 mx-1">
-                          XL
-                        </span>
-                      )}
-                      {product.size.includes("XXL") && (
-                        <span className="border border-gray-300 px-1 mx-1">
-                          XXL
-                        </span>
-                      )}
+                      <span className="border border-gray-300 px-2 py-1 rounded text-sm">
+                        {product.size}
+                      </span>
                     </div>
 
                     <p className="mt-2 text-lg font-semibold text-gray-900">

@@ -7,20 +7,23 @@ export async function GET(
 ) {
   try {
     await connectDb();
-    
     const { slug } = params;
     
-    // Find product by slug
+    console.log("🔍 Fetching product with slug:", slug);
+    
     const product = await Product.findOne({ slug });
     
     if (!product) {
+      console.log("❌ Product not found for slug:", slug);
       return Response.json(
         { error: "Product not found" },
         { status: 404 }
       );
     }
     
+    console.log("✅ Product found:", product.title);
     return Response.json(product);
+    
   } catch (error) {
     console.error("❌ Error fetching product:", error);
     return Response.json(

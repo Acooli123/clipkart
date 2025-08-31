@@ -1,7 +1,6 @@
+"use client";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Footer from "@/components/Footer";
-import Product from "@/models/Product";
-import connectDb from "@/lib/dbConnect";
 import Navbar from "@/components/Navbar";
 
 type ProductType = {
@@ -9,16 +8,45 @@ type ProductType = {
   title: string;
   category: string;
   price: number;
-  size: string[];
+  size: string;
   image: string;
   slug: string;
 };
 
-export default async function page() {
-  await connectDb();
+export default function Page() {
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ Only fetch products with category = "accessories"
-  const products = await Product.find({ category: "accessories" }).lean();
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/getproducts?category=accessories');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error('Failed to fetch products');
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen w-full">
+        <Navbar />
+        <div className="flex items-center justify-center flex-1">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col -mt-5 min-h-screen w-full">
@@ -55,6 +83,11 @@ export default async function page() {
                     <h2 className="text-gray-900 title-font text-lg font-medium">
                       {product.title}
                     </h2>
+                    <div className="mt-1">
+                      <span className="border border-gray-300 px-2 py-1 rounded text-sm">
+                        {product.size}
+                      </span>
+                    </div>
 
                     <p className="mt-2 text-lg font-semibold text-gray-900">
                       ₹{product.price}
@@ -66,8 +99,6 @@ export default async function page() {
           </div>
         </div>
       </section>
-
-      {/* <Footer /> */}
     </div>
   );
 }

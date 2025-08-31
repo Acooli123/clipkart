@@ -14,7 +14,7 @@ export default function LoginPage() {
   });
 
   const router = useRouter();
-  const { login } = useUser();
+  const { login, signup } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,14 +24,32 @@ export default function LoginPage() {
     setLoading(true);
     
     try {
-      const success = await login(formData.email, formData.password);
-      if (success) {
-        router.push('/home'); // Redirect to home page after successful login
+      if (isLogin) {
+        // Handle Login
+        const result = await login(formData.email, formData.password);
+        if (result.success) {
+          console.log('✅ Login successful, redirecting to home...');
+          // Force a small delay to ensure state is updated
+          setTimeout(() => {
+            router.push('/home');
+          }, 100);
+        } else {
+          console.log('❌ Login failed:', result.error);
+          setError(result.error || 'Login failed. Please try again.');
+        }
       } else {
-        setError('Invalid email or password');
+        // Handle Signup
+        const result = await signup(formData.name, formData.email, formData.password);
+        if (result.success) {
+          alert('Account created successfully! Please login to continue.');
+          setIsLogin(true); // Switch to login mode
+          setFormData({ email: '', password: '', name: '' }); // Clear form
+        } else {
+          setError(result.error || 'Failed to create account. Please try again.');
+        }
       }
     } catch (err) {
-      setError('An error occurred during login');
+      setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -42,6 +60,10 @@ export default function LoginPage() {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) {
+      setError('');
+    }
   };
 
   return (
@@ -67,6 +89,13 @@ export default function LoginPage() {
                 : 'Sign up for a new account'}
             </p>
           </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -134,9 +163,15 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 mt-6"
+              disabled={loading}
+              className={`w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 mt-6 ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              {isLogin ? 'Sign In' : 'Sign Up'}
+              {loading 
+                ? (isLogin ? 'Signing In...' : 'Creating Account...') 
+                : (isLogin ? 'Sign In' : 'Sign Up')
+              }
             </button>
           </form>
 

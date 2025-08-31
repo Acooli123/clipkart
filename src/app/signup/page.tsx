@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/context/UserContext';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function SignupPage() {
     password: '',
     confirmPassword: ''
   });
+  const { signup } = useUser();
+  const [apiError, setApiError] = useState('');
 
   const validateForm = () => {
     let isValid = true;
@@ -77,6 +80,10 @@ export default function SignupPage() {
         [name]: ''
       }));
     }
+    // Clear API error when user starts typing
+    if (apiError) {
+      setApiError('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,16 +91,21 @@ export default function SignupPage() {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setApiError('');
+    
     try {
-      // Here you would typically make an API call to your backend
-      // For now, we'll simulate a signup process
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Signup successful:', formData);
-      // Show success message and redirect to login page only
-      alert('Account created successfully! Please login to continue.');
-      router.replace('/login');
+      const result = await signup(formData.name, formData.email, formData.password);
+      
+      if (result.success) {
+        // Show success message and redirect to login page
+        alert('Account created successfully! Please login to continue.');
+        router.replace('/login');
+      } else {
+        setApiError(result.error || 'Failed to create account. Please try again.');
+      }
     } catch (error) {
       console.error('Signup failed:', error);
+      setApiError('An error occurred during signup. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -142,6 +154,13 @@ export default function SignupPage() {
               Join our community and start shopping!
             </p>
           </div>
+
+          {/* API Error Display */}
+          {apiError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              {apiError}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

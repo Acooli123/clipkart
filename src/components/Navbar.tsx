@@ -79,11 +79,20 @@ export default function Navbar() {
             className={`flex items-center justify-center relative ${!isAuthenticated ? 'opacity-50 cursor-not-allowed' : ''}`}
             title={!isAuthenticated ? 'Please login to use cart' : 'View cart'}
           >
-            <img
-              src="/cart.jpg"
-              alt="cart"
-              className="w-7 h-7 object-contain"
-            />
+            <svg
+              className="w-7 h-7 text-gray-700 hover:text-indigo-600 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"
+              />
+            </svg>
 
             {/* 🔴 Badge for total items */}
             {cartCount > 0 && (
