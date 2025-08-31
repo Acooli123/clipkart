@@ -80,7 +80,7 @@ export default function Home() {
   return (
     <div className="flex flex-col -mt-5 min-h-screen w-full bg-gray-50">
       {/* Navbar */}
-      
+      <Navbar />
 
       {/* Page Content */}
       <div className="flex-grow p-6 flex flex-col items-center justify-center">

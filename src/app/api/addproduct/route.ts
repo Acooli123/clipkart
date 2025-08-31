@@ -52,3 +52,20 @@ export async function POST(req: Request) {
     return Response.json({ error: "Failed to add product" }, { status: 500 });
   }
 }
+
+// DELETE method → clear all products
+export async function DELETE() {
+  try {
+    await connectDb();
+
+    await Product.deleteMany({});
+    
+    return Response.json(
+      { message: "✅ All products cleared successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("❌ Error clearing products:", error);
+    return Response.json({ error: "Failed to clear products" }, { status: 500 });
+  }
+}

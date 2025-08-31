@@ -4,39 +4,74 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Product from "@/models/Product";
-import connectDb from "@/lib/dbConnect";
 import { useState, useEffect } from "react";
 import { useCart } from "@/components/CartContext";
+
+interface Product {
+  _id: string;
+  title: string;
+  slug: string;
+  color: string;
+  description: string;
+  price: number;
+  size: string;
+  image: string;
+  category: string;
+  availableQty: number;
+}
 
 export default function Page({ params }: { params: { slug: string } }) {
   const { slug } = params;
   const { addToCart } = useCart();
   const [pincode, setPincode] = useState("");
   const [service, setService] = useState("");
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
   // State to track if an item has been added to the cart
   const [itemAdded, setItemAdded] = useState(false);
 
+  // Fetch product data
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`/api/product/${slug}`);
+        if (response.ok) {
+          const productData = await response.json();
+          setProduct(productData);
+          setSelectedSize(productData.size || "");
+          setSelectedColor(productData.color || "");
+        } else {
+          console.error("Failed to fetch product");
+        }
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [slug]);
+
   const checkServiceability = async () => {
-  const pins = await fetch("/api/pincode");
-  const pinJson = await pins.json();
+    const pins = await fetch("/api/pincode");
+    const pinJson = await pins.json();
 
-  console.log("📦 API Response:", pinJson, "Entered Pincode:", pincode);
+    console.log("📦 API Response:", pinJson, "Entered Pincode:", pincode);
 
-  // If API returns strings (["123456", "654321"])
-  if (pinJson.pincodes?.includes(pincode)) {
-    setService("Yes");
-  }
-  // If API returns numbers ([123456, 654321])
-  else if (pinJson.pincodes?.includes(parseInt(pincode))) {
-    setService("Yes");
-  } 
-  else {
-    setService("No");
-  }
-};
-
+    // The API returns an array directly, not wrapped in an object
+    const pincodes = Array.isArray(pinJson) ? pinJson : pinJson.pincodes || [];
+    
+    // Check if the entered pincode exists in the array
+    if (pincodes.includes(pincode) || pincodes.includes(parseInt(pincode))) {
+      setService("Yes");
+    } else {
+      setService("No");
+    }
+  };
 
   useEffect(() => {
     if (pincode) {
@@ -48,40 +83,73 @@ export default function Page({ params }: { params: { slug: string } }) {
     setPincode(e.target.value);
   };
 
-
   // New function to handle adding to cart and updating state
   const handleAddToCart = () => {
-    addToCart(
-      slug, // itemCode
-      1399, // price
-      "T-shirt", // name
-      "M", // size
-      "Blue" // variant
-    );
-    setItemAdded(true);
+    if (product) {
+      // For t-shirts, require size selection; for other products, use default size
+      const sizeToUse = product.category === "t-shirts" ? selectedSize : product.size;
+      
+      addToCart(
+        product.slug, // itemCode
+        product.price, // price
+        product.title, // name
+        sizeToUse, // size
+        selectedColor || product.color // variant
+      );
+      setItemAdded(true);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen w-full">
+        <div className="container px-5 py-24 mx-auto">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading product...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex flex-col min-h-screen w-full">
+        <div className="container px-5 py-24 mx-auto">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
+            <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
+            <Link href="/" className="text-indigo-600 hover:text-indigo-800">
+              Go back to home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col -mt-5 min-h-screen w-full">
       {/* Navbar fixed at the top, full width */}
       <div className="sticky top-0 z-50 w-full">
-        {/* <Navbar /> */}
+        <Navbar />
       </div>
       <section className="text-gray-700 bg-white body-font overflow-hidden">
         <div className="container px-5 py-24 mx-auto">
           <div className="lg:w-4/5 mx-auto flex flex-wrap">
             <img
-              alt="ecommerce"
+              alt={product.title}
               className="lg:w-1/2 w-full h-120 object-contain object-center rounded"
-              src="https://m.media-amazon.com/images/I/81g0RBf8ZoL._AC_UL480_FMwebp_QL65_.jpg"
+              src={product.image || "https://m.media-amazon.com/images/I/81g0RBf8ZoL._AC_UL480_FMwebp_QL65_.jpg"}
             />
 
             <div className="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
               <h2 className="text-sm title-font text-gray-500 tracking-widest">
-                Clipkart
+                {product.category}
               </h2>
               <h1 className="text-gray-900 text-3xl title-font font-medium mb-1">
-                Your nearest shopping store (Slug: {slug})
+                {product.title}
               </h1>
               <div className="flex mb-4">
                 <span className="flex items-center">
@@ -104,64 +172,73 @@ export default function Page({ params }: { params: { slug: string } }) {
               </div>
 
               <p className="leading-relaxed">
-                Clipkart is your one-stop shopping destination for all your
-                everyday needs. From trendy fashion and latest gadgets to home
-                essentials and groceries, Clipkart brings everything closer to
-                you with fast delivery and trusted quality. Shop anytime,
-                anywhere – because your nearest store is now just a click away!.
+                {product.description || "No description available for this product."}
               </p>
 
               <div className="flex mt-6 items-center pb-5 border-b-2 border-gray-200 mb-5">
                 <div className="flex">
                   <span className="mr-3">Color</span>
-                  <button className="border-2 border-gray-300 rounded-full w-6 h-6 focus:outline-currentColor"></button>
-                  <button className="border-2 border-gray-300 ml-1 bg-gray-400 rounded-full w-6 h-6 focus:outline-currentColor"></button>
-                  <button className="border-2 border-gray-300 ml-1 bg-indigo-500 rounded-full w-6 h-6 focus:outline-currentColor"></button>
+                  <button 
+                    className={`border-2 border-gray-300 rounded-full w-6 h-6 focus:outline-currentColor ${
+                      selectedColor === product.color ? 'ring-2 ring-indigo-500' : ''
+                    }`}
+                    style={{ backgroundColor: product.color }}
+                    onClick={() => setSelectedColor(product.color)}
+                  ></button>
                 </div>
-                <div className="flex ml-6 items-center">
-                  <span className="mr-3">Size</span>
-                  <div className="relative">
-                    <select
-                      className="rounded border border-gray-300 focus:ring-2 focus:ring-indigo-400 
+                {product.category === "t-shirts" && (
+                  <div className="flex ml-6 items-center">
+                    <span className="mr-3">Size</span>
+                    <div className="relative">
+                      <select
+                        value={selectedSize}
+                        onChange={(e) => setSelectedSize(e.target.value)}
+                        className="rounded border border-gray-300 focus:ring-2 focus:ring-indigo-400 
   bg-white text-gray-700 py-2 pl-3 pr-10 appearance-currentColor focus:outline-currentColor focus:border-indigo-500"
-                    >
-                      <option className="bg-white text-gray-700">S</option>
-                      <option className="bg-white text-gray-700">M</option>
-                      <option className="bg-white text-gray-700">L</option>
-                      <option className="bg-white text-gray-700">XL</option>
-                    </select>
-
-                    <span className="absolute right-0 top-0 h-full w-10 text-center text-gray-500 pointer-events-currentColor flex items-center justify-center">
-                      <svg
-                        fill="currentColor"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        className="w-4 h-4"
-                        viewBox="0 0 24 24"
                       >
-                        <path d="M6 9l6 6 6-6"></path>
-                      </svg>
-                    </span>
+                        <option value="">Select Size</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                      </select>
+
+                      <span className="absolute right-0 top-0 h-full w-10 text-center text-gray-500 pointer-events-currentColor flex items-center justify-center">
+                        <svg
+                          fill="currentColor"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          className="w-4 h-4"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="flex flow-row">
                 <span className="title-font font-medium text-2xl text-gray-900">
-                  ₹1399.00
+                  ₹{product.price.toFixed(2)}
                 </span>
                 <button className="flex ml-4 text-white bg-indigo-500 border-0 py-2 px-4 focus:outline-currentColor hover:bg-indigo-600 rounded-lg">
                   Buy now
                 </button>
                 <button
                   onClick={handleAddToCart}
-                  className="flex ml-2 text-white bg-indigo-500 border-0 py-2 px-6 hover:bg-indigo-600 rounded-lg"
+                  disabled={product.category === "t-shirts" && !selectedSize}
+                  className={`flex ml-2 text-white border-0 py-2 px-6 rounded-lg ${
+                    (product.category === "t-shirts" && selectedSize) || product.category !== "t-shirts"
+                      ? 'bg-indigo-500 hover:bg-indigo-600' 
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
                 >
                   Add to Cart
                 </button>
-                {/* Conditionally render the View Cart button after an item is added */}
                 
                 <button className="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
                   <svg
@@ -176,6 +253,11 @@ export default function Page({ params }: { params: { slug: string } }) {
                   </svg>
                 </button>
               </div>
+
+              {product.category === "t-shirts" && !selectedSize && (
+                <p className="text-red-500 text-sm mt-2">Please select a size to add to cart</p>
+              )}
+
               <div className="pin flex gap-4 mt-4">
                 <input
                   type="text"
@@ -210,22 +292,3 @@ export default function Page({ params }: { params: { slug: string } }) {
     </div>
   );
 }
-
-// export async function getServerSideProps(context) {
-//   if(!mongoose.connections[0].readyState){
-//     await mongoose.connect(process.env.MONGO_URI)
-//   }
-//   let product = await Product.findOne({slug: context.params.slug});
-//   let varients = await Product.find({title: product.title, category: product.category});
-//   let sizeColorSlug = {};
-//   for(let item of varients){
-//     if(Object.keys(sizeColorSlug).includes(item.size)){
-//       sizeColorSlug[item.size][item.color] = item.slug
-//     }else{
-//       sizeColorSlug[item.size] = {}
-//       sizeColorSlug[item.size][item.color] = item.slug
-//     }
-//   }
-//   return { props: { product: JSON.parse(JSON.stringify(product)) } };
-
-// }

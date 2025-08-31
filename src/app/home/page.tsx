@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 export default function page() {
   return (
     <div>
+      {/* Navbar */}
+      <Navbar />
       
       <main className="flex-grow p-4 container mx-auto">
         {/* Responsive Image */}

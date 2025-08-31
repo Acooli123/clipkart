@@ -2,6 +2,7 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import Product from "@/models/Product";
 import connectDb from "@/lib/dbConnect";
+import Navbar from "@/components/Navbar";
 
 type ProductType = {
   _id: string;
@@ -10,6 +11,7 @@ type ProductType = {
   price: number;
   size: string[];
   image: string;
+  slug: string;
 };
 
 export default async function page() {
@@ -21,7 +23,9 @@ export default async function page() {
   return (
     <div className="flex flex-col -mt-5 min-h-screen w-full">
       {/* Navbar fixed at the top, full width */}
-      <div className="sticky top-0 z-50 w-full"></div>
+      <div className="sticky top-0 z-50 w-full">
+        <Navbar />
+      </div>
 
       {/* Page content */}
       <section className="text-gray-600 body-font">
@@ -29,7 +33,7 @@ export default async function page() {
           <div className="flex flex-wrap m-1 gap-3 justify-center">
             {products.map((product: ProductType) => (
               <Link
-                href={`/product/${product._id}`}
+                href={`/product/${product.slug}`}
                 key={product._id}
                 className="block"
               >
