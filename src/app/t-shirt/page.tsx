@@ -53,7 +53,7 @@ export default function Page() {
     <div className="flex flex-col -mt-5 min-h-screen w-full">
       {/* Navbar fixed at the top, full width */}
       <div className="sticky top-0 z-50 w-full">
-        <Navbar />
+        {/* <Navbar /> */}
       </div>
 
       {/* Page content */}

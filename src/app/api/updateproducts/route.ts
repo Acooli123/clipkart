@@ -14,23 +14,27 @@ export async function GET() {
   }
 }
 
-// POST method → add products using loop
+// POST method → add or update products
 export async function POST(req: Request) {
   try {
     await connectDb();
 
     const body = await req.json();
 
-    // If body is an array, loop and save one by one
     if (Array.isArray(body)) {
+      // Upsert each product
       for (let i = 0; i < body.length; i++) {
-        let p = new Product.findByAndUpdate(body[i]._id, body[i], { new: true, upsert: true });
-        await p.save();
+        await Product.findByIdAndUpdate(body[i]._id, body[i], {
+          new: true,
+          upsert: true, // insert if not found
+        });
       }
     } else {
       // Single product
-      let p = new Product(body);
-      await p.save();
+      await Product.findByIdAndUpdate(body._id, body, {
+        new: true,
+        upsert: true,
+      });
     }
 
     return Response.json(

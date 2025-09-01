@@ -20,15 +20,15 @@ export default function Page() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('/api/getproducts?category=mugs');
+        const response = await fetch("/api/getproducts?category=mugs");
         if (response.ok) {
           const data = await response.json();
           setProducts(data);
         } else {
-          console.error('Failed to fetch products');
+          console.error("Failed to fetch products");
         }
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
@@ -40,7 +40,7 @@ export default function Page() {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen w-full">
-        <Navbar />
+        {/* <Navbar /> */}
         <div className="flex items-center justify-center flex-1">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
         </div>
@@ -51,9 +51,7 @@ export default function Page() {
   return (
     <div className="flex flex-col -mt-5 min-h-screen w-full">
       {/* Navbar fixed at the top, full width */}
-      <div className="sticky top-0 z-50 w-full">
-        <Navbar />
-      </div>
+      <div className="sticky top-0 z-50 w-full">{/* <Navbar /> */}</div>
 
       {/* Page content */}
       <section className="text-gray-600 body-font">
@@ -83,11 +81,13 @@ export default function Page() {
                     <h2 className="text-gray-900 title-font text-lg font-medium">
                       {product.title}
                     </h2>
-                    <div className="mt-1">
-                      <span className="border border-gray-300 px-2 py-1 rounded text-sm">
-                        {product.size}
-                      </span>
-                    </div>
+                    {product.size && (
+                      <div className="mt-1">
+                        <span className="border border-gray-300 px-2 py-1 rounded text-sm">
+                          {product.size}
+                        </span>
+                      </div>
+                    )}
 
                     <p className="mt-2 text-lg font-semibold text-gray-900">
                       ₹{product.price}
