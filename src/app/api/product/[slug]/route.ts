@@ -1,3 +1,4 @@
+// src/app/api/product/[slug]/route.ts
 import connectDb from "@/lib/dbConnect";
 import Product from "@/models/Product";
 
@@ -6,10 +7,18 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    console.log("🚀 API route called for slug:", params.slug);
+    
     await connectDb();
+    console.log("✅ Database connected successfully");
+    
     const { slug } = params;
     
     console.log("🔍 Fetching product with slug:", slug);
+    
+    // Add this to see what's in your database
+    const allProducts = await Product.find({}).limit(5);
+    console.log("📦 Sample products in DB:", allProducts.map(p => ({ slug: p.slug, title: p.title })));
     
     const product = await Product.findOne({ slug });
     

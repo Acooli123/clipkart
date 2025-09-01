@@ -35,26 +35,34 @@ export default function Page({ params }: { params: { slug: string } }) {
 
   // Fetch product data
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await fetch(`/api/product/${slug}`);
-        if (response.ok) {
-          const productData = await response.json();
-          setProduct(productData);
-          setSelectedSize(productData.size || "");
-          setSelectedColor(productData.color || "");
-        } else {
-          console.error("Failed to fetch product");
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch(`/api/product/${slug}`);
+      
+      if (response.ok) {
+        const productData = await response.json();
+        setProduct(productData);
+        setSelectedSize(productData.size || "");
+        setSelectedColor(productData.color || "");
+      } else {
+        // Log the response status and text for debugging
+        const errorText = await response.text();
+        console.error("Failed to fetch product:", response.status, errorText);
+        
+        if (response.status === 404) {
+          console.error("Product not found for slug:", slug);
         }
-      } catch (error) {
-        console.error("Error fetching product:", error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      // You might want to set an error state here
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProduct();
-  }, [slug]);
+  fetchProduct();
+}, [slug]);
 
   const checkServiceability = async () => {
     const pins = await fetch("/api/pincode");
@@ -133,7 +141,7 @@ export default function Page({ params }: { params: { slug: string } }) {
     <div className="flex flex-col -mt-5 min-h-screen w-full">
       {/* Navbar fixed at the top, full width */}
       <div className="sticky top-0 z-50 w-full">
-        <Navbar />
+        {/* <Navbar /> */}
       </div>
       <section className="text-gray-700 bg-white body-font overflow-hidden">
         <div className="container px-5 py-24 mx-auto">

@@ -41,7 +41,7 @@ export default function Page() {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen w-full">
-        <Navbar />
+        {/* <Navbar /> */}
         <div className="flex items-center justify-center flex-1">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-500"></div>
         </div>
